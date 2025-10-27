@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/samb/CPPprojects/imagecompression/build",
+  "command": "/usr/bin/c++  -I/home/samb/CPPprojects/imagecompression/include -g -std=c++23 -Wall -Wextra -Wpedantic -O3 -march=native -o CMakeFiles/imagecompression.dir/src/main.cpp.o -c /home/samb/CPPprojects/imagecompression/src/main.cpp",
+  "file": "/home/samb/CPPprojects/imagecompression/src/main.cpp",
+  "output": "CMakeFiles/imagecompression.dir/src/main.cpp.o"
+}
+]

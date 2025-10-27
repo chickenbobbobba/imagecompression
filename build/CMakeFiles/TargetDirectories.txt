@@ -1,0 +1,3 @@
+/home/samb/CPPprojects/imagecompression/build/CMakeFiles/imagecompression.dir
+/home/samb/CPPprojects/imagecompression/build/CMakeFiles/edit_cache.dir
+/home/samb/CPPprojects/imagecompression/build/CMakeFiles/rebuild_cache.dir
