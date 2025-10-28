@@ -84,7 +84,6 @@ std::vector<std::complex<double>> FFT(const std::vector<std::complex<double>>& d
 
     std::vector<std::complex<double>> a(m, 0.0), b(m, 0.0);
 
-    // Chirp precomputation
     for (size_t i = 0; i < n; ++i) {
         double angle = PI * (i * i) / (double)n;
         std::complex<double> w = std::polar(1.0, -angle);
@@ -93,14 +92,12 @@ std::vector<std::complex<double>> FFT(const std::vector<std::complex<double>>& d
         if (i != 0) b[m - i] = w;
     }
 
-    // Convolution using power-of-two FFTs
     auto A = FFT_ip(a);
     auto B = FFT_ip(b);
     for (size_t i = 0; i < m; ++i)
         A[i] *= B[i];
     A = IFFT_ip(A);
 
-    // Post multiply by chirp
     std::vector<std::complex<double>> result(n);
     for (size_t i = 0; i < n; ++i) {
         double angle = PI * (i * i) / n;

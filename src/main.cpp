@@ -20,8 +20,8 @@ void savePPM(const std::string& path, int width, int height, const std::vector<u
 
 int main(int argc, char** argv){
     double keepfrac = /* 1/ */1;
-    for (;;) {
-        std::string filepath = "../resources/ball.png";
+    while (keepfrac <= 16384.0) {
+        std::string filepath = "../resources/mandelbrot.png";
         if (argc > 1) filepath = argv[1];
         std::cout << "filepath: " << filepath << "\n";
         std::cout << "reading...\n";
@@ -63,19 +63,20 @@ int main(int argc, char** argv){
             filterlist[i] = std::make_tuple(waves[i], i);
         }
 
-        std::sort(filterlist.begin(), filterlist.end(), [](std::tuple<std::complex<double>, size_t> a, std::tuple<std::complex<double>, size_t> b) {return abs(std::get<0>(a)) > abs(std::get<0>(b));});
+        std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return abs(std::get<0>(a)) > abs(std::get<0>(b));});
         
         for (size_t i = (double)waves.size() / keepfrac; i < waves.size(); i++) {
             std::get<0>(filterlist[i]) = 0;
         }
 
-        std::sort(filterlist.begin(), filterlist.end(), [](std::tuple<std::complex<double>, size_t> a, std::tuple<std::complex<double>, size_t> b) {return std::get<1>(a) < std::get<1>(b);});
+        std::cout << "reconstructing...\n";
+
+        std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return std::get<1>(a) < std::get<1>(b);});
 
         for (size_t i = 0; i < waves.size(); i++) {
             waves[i] = std::get<0>(filterlist[i]);
         }
 
-        std::cout << "reconstructing...\n";
         waves = IFFT(waves);
 
         std::cout << "decoding...\n";
@@ -94,6 +95,6 @@ int main(int argc, char** argv){
         std::cout << "writing...\n";
         std::string outpath = "out" + std::to_string((long)keepfrac) + ".ppm";
         savePPM(outpath, width, height, rawOut);
-        keepfrac *= 2;
+        keepfrac *= 4;
     }
 }
