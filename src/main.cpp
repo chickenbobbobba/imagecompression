@@ -74,9 +74,6 @@ public:
         }
 
         waves = FFT(waves);
-        for (auto& i : waves) {
-            std::cout << i << "\n";
-        }
     }
 
     void wavesToImage1d() {
@@ -86,7 +83,8 @@ public:
         waves = IFFT(waves);
 
         for (size_t i = 0; i < waves.size(); i++) {
-            image1d[i] = abs(waves[i]);
+            image1d[i] = (unsigned char)std::min(255L, (long)abs(waves[i]));
+            // image1d[i] = image1d[i] + 128 * (i % 2);
         }
     }
 };
