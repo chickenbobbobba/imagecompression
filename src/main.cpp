@@ -11,51 +11,83 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-void savePPM(const std::string& path, int width, int height, const std::vector<unsigned char>& data) {
-    std::cout << width * height * 3 << " " << data.size() << "\n";
-    std::ofstream out(path, std::ios::binary);
-    out << "P6\n" << width << " " << height << "\n255\n";
-    out.write((char*)data.data(), data.size());
-}
+class Image {
+public:
+    int width;
+    int height;
+    int channels;
+    std::vector<unsigned char> image2d; // standard linear mapping
+    std::vector<unsigned char> image1d; // hilbert mapping
+    std::vector<std::complex<double>> waves;
+
+    void loadImage(const std::string& path) {
+        image2d = stbi_load(path.c_str(), &width, &height, &channels, 3);
+        std::cout << "width: " << width << "\nheight: " << height << "\nchannels: " << channels << "\n";
+    }
+
+    void savePPM(const std::string& path) {
+        assert(image2d.size() == width * height * channels);
+        std::ofstream out(path, std::ios::binary);
+        out << "P6\n" << width << " " << height << " " << channels << "\n255\n";
+        out.write((const char*)image2d.data(), image2d.size());
+    }
+
+    void hilbTo1d() {
+        image1d.resize(width * height * channels);
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int index = channels * (j + width * i);
+                int hilbidx = channels * gilbidx(j, i, width, height);
+
+                for (int k = 0; k < channels; k++) {
+                    image1d[hilbidx + k] = image2d[index + k];
+                }
+            }
+        }
+    }
+
+    void hilbTo2d() {
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int index = channels * (j + width * i);
+                int hilbidx = channels * gilbidx(j, i, width, height);
+
+                for (int k = 0; k < channels; k++) {
+                    image2d[index + k] = image1d[hilbidx + k];
+                }
+            }
+        }
+    }
+
+    void image1dToWaves() {
+        waves.reserve(image1d.size());
+
+        for (auto i : image1d) {
+            waves.emplace_back(i, 0.0);
+        }
+
+        waves = FFT(image1d);
+    }
+
+    void wavesToImage1d() {
+        if (image1d.size() < waves.size())
+            image1d.resize(waves.size());
+
+        image1d = IFFT(waves);
+    }
+};
 
 int main(int argc, char** argv){
     double keepfrac = /* 1/ */1;
-    while (keepfrac <= 16384.0) {
+    while (keepfrac <= 1) {
+        Image image;
         std::string filepath = "../resources/mandelbrot.png";
         if (argc > 1) filepath = argv[1];
         std::cout << "filepath: " << filepath << "\n";
         std::cout << "reading...\n";
-        int width = 0;
-        int height = 0;
-        int channels = 0;
-        
-        unsigned char* rawIn = stbi_load(filepath.c_str(), &width, &height, &channels, 3);
-        std::cout << "width: " << width << "\nheight: " << height << "\nchannels: " << channels << "\n";
-
         std::cout << "encoding...\n";
-
-        std::vector<unsigned char> rawOut(3 * width * height);
-        
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                int index = 3 * (j + width * i);
-                int hilbidx = 3 * gilbidx(j, i, width, height);
-
-                for (int k = 0; k < channels; k++) {
-                    rawOut[hilbidx + k] = rawIn[index + k];
-                }
-            }
-        }
-
         std::cout << "FFT prep...\n";
-        std::vector<std::complex<double>> waves;
-        waves.reserve(rawOut.size());
-
-        for (auto i : rawOut) {
-            waves.emplace_back(i, 0.0);
-        }
         std::cout << "FFT...\n";
-        waves = FFT(waves);
         std::cout << "truncating smallest...\n";
         std::vector<std::tuple<std::complex<double>, size_t>> filterlist(waves.size());
 
@@ -77,24 +109,9 @@ int main(int argc, char** argv){
             waves[i] = std::get<0>(filterlist[i]);
         }
 
-        waves = IFFT(waves);
-
         std::cout << "decoding...\n";
-
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                int index = 3 * (j + width * i);
-                int hilbidx = 3 * gilbidx(j, i, width, height);
-
-                for (int k = 0; k < channels; k++) {
-                    rawOut[index + k] = std::min(255, (int)abs(waves[hilbidx + k]));
-                }
-            }
-        }
-
         std::cout << "writing...\n";
         std::string outpath = "out" + std::to_string((long)keepfrac) + ".ppm";
-        savePPM(outpath, width, height, rawOut);
         keepfrac *= 4;
     }
 }

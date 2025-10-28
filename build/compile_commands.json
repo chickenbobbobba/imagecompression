@@ -1,8 +1,8 @@
 [
 {
   "directory": "/home/samb/CPPprojects/imagecompression/build",
-  "command": "/usr/lib/llvm/21/bin/clang++ -I/home/samb/CPPprojects/imagecompression/include -O3 -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -O3 -march=native -o CMakeFiles/imagecompression.dir/src/main.cpp.o -c /home/samb/CPPprojects/imagecompression/src/main.cpp",
+  "command": "/usr/bin/c++  -I/home/samb/CPPprojects/imagecompression/include -g -std=c++23 -Wall -Wextra -Wpedantic -O3 -march=native -o CMakeFiles/imagecompression.dir/src/main.cpp.o -c /home/samb/CPPprojects/imagecompression/src/main.cpp",
   "file": "/home/samb/CPPprojects/imagecompression/src/main.cpp",
-  "output": "/home/samb/CPPprojects/imagecompression/build/CMakeFiles/imagecompression.dir/src/main.cpp.o"
+  "output": "CMakeFiles/imagecompression.dir/src/main.cpp.o"
 }
 ]
