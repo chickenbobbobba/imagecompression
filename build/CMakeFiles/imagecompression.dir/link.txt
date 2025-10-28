@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/imagecompression.dir/link.d CMakeFiles/imagecompression.dir/src/main.cpp.o -o imagecompression

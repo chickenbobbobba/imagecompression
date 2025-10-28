@@ -5,12 +5,12 @@
 		{
 			"compiler" : 
 			{
-				"id" : "GNU",
+				"id" : "Clang",
 				"implicit" : 
 				{
 					"includeDirectories" : 
 					[
-						"/usr/lib/gcc/x86_64-pc-linux-gnu/15/include",
+						"/usr/lib/clang/21/include",
 						"/usr/include"
 					],
 					"linkDirectories" : 
@@ -19,8 +19,8 @@
 						"/usr/lib64",
 						"/lib64",
 						"/usr/x86_64-pc-linux-gnu/lib",
-						"/usr/lib",
-						"/lib"
+						"/lib",
+						"/usr/lib"
 					],
 					"linkFrameworkDirectories" : [],
 					"linkLibraries" : 
@@ -32,8 +32,8 @@
 						"gcc_s"
 					]
 				},
-				"path" : "/usr/bin/cc",
-				"version" : "15.2.1"
+				"path" : "/usr/lib/llvm/21/bin/clang",
+				"version" : "21.1.4"
 			},
 			"language" : "C",
 			"sourceFileExtensions" : 
@@ -45,7 +45,7 @@
 		{
 			"compiler" : 
 			{
-				"id" : "GNU",
+				"id" : "Clang",
 				"implicit" : 
 				{
 					"includeDirectories" : 
@@ -53,7 +53,7 @@
 						"/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15",
 						"/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu",
 						"/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/backward",
-						"/usr/lib/gcc/x86_64-pc-linux-gnu/15/include",
+						"/usr/lib/clang/21/include",
 						"/usr/include"
 					],
 					"linkDirectories" : 
@@ -62,8 +62,8 @@
 						"/usr/lib64",
 						"/lib64",
 						"/usr/x86_64-pc-linux-gnu/lib",
-						"/usr/lib",
-						"/lib"
+						"/lib",
+						"/usr/lib"
 					],
 					"linkFrameworkDirectories" : [],
 					"linkLibraries" : 
@@ -77,8 +77,8 @@
 						"gcc"
 					]
 				},
-				"path" : "/usr/bin/c++",
-				"version" : "15.2.1"
+				"path" : "/usr/lib/llvm/21/bin/clang++",
+				"version" : "21.1.4"
 			},
 			"language" : "CXX",
 			"sourceFileExtensions" : 

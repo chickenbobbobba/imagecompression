@@ -49,7 +49,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g -std=c++23"
+					"fragment" : "-O3 -DNDEBUG -std=c++23"
 				},
 				{
 					"backtrace" : 2,
@@ -100,7 +100,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-g",
+				"fragment" : "-O3 -DNDEBUG",
 				"role" : "flags"
 			}
 		],
