@@ -21,7 +21,13 @@ public:
     std::vector<std::complex<double>> waves;
 
     void loadImage(const std::string& path) {
-        image2d = stbi_load(path.c_str(), &width, &height, &channels, 3);
+        unsigned char* temp = stbi_load(path.c_str(), &width, &height, &channels, 3);
+        if (temp) {
+            image2d.assign(temp, temp + width * height * channels);
+        } else {
+            std::cout << "error loading image!\n";
+            throw;
+        }
         std::cout << "width: " << width << "\nheight: " << height << "\nchannels: " << channels << "\n";
     }
 
@@ -62,56 +68,63 @@ public:
     void image1dToWaves() {
         waves.reserve(image1d.size());
 
-        for (auto i : image1d) {
-            waves.emplace_back(i, 0.0);
+        for (char i : image1d) {
+            waves.emplace_back((double)i, 0.0);
         }
 
-        waves = FFT(image1d);
+        waves = FFT(waves);
     }
 
     void wavesToImage1d() {
         if (image1d.size() < waves.size())
             image1d.resize(waves.size());
 
-        image1d = IFFT(waves);
+        waves = IFFT(waves);
+
+        for (size_t i = 0; i < waves.size(); i++) {
+            image1d[i] = waves[i].real();
+        }
     }
 };
 
 int main(int argc, char** argv){
-    double keepfrac = /* 1/ */1;
+    double keepfrac = 1;
     while (keepfrac <= 1) {
         Image image;
         std::string filepath = "../resources/mandelbrot.png";
         if (argc > 1) filepath = argv[1];
         std::cout << "filepath: " << filepath << "\n";
         std::cout << "reading...\n";
+        image.loadImage(filepath);
         std::cout << "encoding...\n";
-        std::cout << "FFT prep...\n";
+        image.hilbTo1d();
         std::cout << "FFT...\n";
+        image.image1dToWaves();
         std::cout << "truncating smallest...\n";
-        std::vector<std::tuple<std::complex<double>, size_t>> filterlist(waves.size());
+        {
 
-        for (size_t i = 0; i < waves.size(); i++) {
-            filterlist[i] = std::make_tuple(waves[i], i);
-        }
-
-        std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return abs(std::get<0>(a)) > abs(std::get<0>(b));});
+            std::vector<std::tuple<std::complex<double>, size_t>> filterlist(image.image1d.size());
+            for (size_t i = 0; i < filterlist.size(); i++) {
+                filterlist[i] = std::make_tuple(image.image1d[i], i);
+            }
+            std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return abs(std::get<0>(a)) > abs(std::get<0>(b));});
+            for (size_t i = (double)filterlist.size() / keepfrac; i < filterlist.size(); i++) {
+                std::get<0>(filterlist[i]) = 0;
+            }
+            
+            std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return std::get<1>(a) < std::get<1>(b);});
+            for (size_t i = 0; i < filterlist.size(); i++) {
+                image.image1d[i] = std::min(255, (int)std::get<0>(filterlist[i]).real());
+            }
         
-        for (size_t i = (double)waves.size() / keepfrac; i < waves.size(); i++) {
-            std::get<0>(filterlist[i]) = 0;
         }
-
         std::cout << "reconstructing...\n";
-
-        std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return std::get<1>(a) < std::get<1>(b);});
-
-        for (size_t i = 0; i < waves.size(); i++) {
-            waves[i] = std::get<0>(filterlist[i]);
-        }
+        image.wavesToImage1d();
 
         std::cout << "decoding...\n";
+        image.hilbTo2d();
         std::cout << "writing...\n";
         std::string outpath = "out" + std::to_string((long)keepfrac) + ".ppm";
-        keepfrac *= 4;
+        image.savePPM(outpath);
     }
 }
