@@ -199,8 +199,6 @@ public:
 
 };
 
-
-
 int main(int argc, char** argv) {
     
     Image image;
@@ -212,19 +210,51 @@ int main(int argc, char** argv) {
     FFT::init((size_t)image.rawData.size());
     
     std::vector<std::complex<double>> b;
+    std::vector<unsigned char> a(image.rawData.size());
+    for (int i = 0; i < image.height; i++) {
+        for (int j = 0; j < image.width; j++) {
+            int index = image.channels * (j + image.width * i);
+            int hilbidx = image.channels * gilbidx(j, i, image.width, image.height);
+
+            for (int k = 0; k < image.channels; k++) {
+                a[hilbidx + k] = image.rawData[index + k];
+            }
+        }
+    }
     b.reserve(image.rawData.size());
-    for (unsigned char i : image.rawData) {
+    for (unsigned char i : a) {
         b.emplace_back((double)i, 0.0);
     }
+
     
     FFT::forward(b);
-    FFT::backward(b);
-    
-    for (size_t i = 0; i < b.size(); i++) {
-        double val = std::abs(b[i])/(double)b.size();
-        image.rawData[i] = (unsigned char)std::clamp(val, 0.0, 255.0);
+    auto c = b;
+
+    long frames = 20*60;
+    for (int i = 0; i < frames; i++) {
+        b = c;
+        std::cout << b.size() - b.size() * i / frames << "\n";
+        for (int j = b.size() - b.size() * i / frames; j < b.size(); j++) {
+            b[j] = 0;
+        }
+        c = b;
+
+        FFT::backward(b);
+
+        for (int i = 0; i < image.height; i++) {
+            for (int j = 0; j < image.width; j++) {
+                int index = image.channels * (j + image.width * i);
+                int hilbidx = image.channels * gilbidx(j, i, image.width, image.height);
+
+                for (int k = 0; k < image.channels; k++) {
+                    double val = std::abs(b[hilbidx + k])/(double)b.size();
+                    image.rawData[index + k] = (unsigned char)std::clamp(val, 0.0, 255.0);
+                }
+            }
+        }
+
+        std::string num = std::to_string(i);
+        while (num.size() < 5) num = "0" + num;
+        image.savePPM("frame_" + num + ".ppm");
     }
-    
-    image.savePPM("out.ppm");
-    return 0;
 }
