@@ -23,7 +23,7 @@ class Image {
 public:
     int width;
     int height;
-    int channels = 3;
+    int channels;
     long segLen;
     long colreduc;
     size_t length;
@@ -196,65 +196,96 @@ public:
             }
         }
     }
-
+    
 };
 
 int main(int argc, char** argv) {
-    
-    Image image;
-    std::string filepath = "";
-    if (argc > 1) filepath = argv[1];
-    std::cout << "filepath: " << filepath << "\n";
-    image.loadImage(filepath);
+    for (double keepfrac = 1; keepfrac < 10000; keepfrac *= 1.1) {
+        
+        Image image;
+        std::string filepath = "";
+        if (argc > 1) filepath = argv[1];
+        std::cout << "filepath: " << filepath << "\n";
+        image.loadImage(filepath);
 
-    FFT::init((size_t)image.rawData.size());
-    
-    std::vector<std::complex<double>> b;
-    std::vector<unsigned char> a(image.rawData.size());
-    for (int i = 0; i < image.height; i++) {
-        for (int j = 0; j < image.width; j++) {
-            int index = image.channels * (j + image.width * i);
-            int hilbidx = image.channels * gilbidx(j, i, image.width, image.height);
-
-            for (int k = 0; k < image.channels; k++) {
-                a[hilbidx + k] = image.rawData[index + k];
-            }
-        }
-    }
-    b.reserve(image.rawData.size());
-    for (unsigned char i : a) {
-        b.emplace_back((double)i, 0.0);
-    }
-
-    
-    FFT::forward(b);
-    auto c = b;
-
-    long frames = 20*60;
-    for (int i = 0; i < frames; i++) {
-        b = c;
-        std::cout << b.size() - b.size() * i / frames << "\n";
-        for (int j = b.size() - b.size() * i / frames; j < b.size(); j++) {
-            b[j] = 0;
-        }
-        c = b;
-
-        FFT::backward(b);
-
+        FFT::init((size_t)image.rawData.size());
+        
+        std::vector<std::complex<double>> b;
+        std::vector<unsigned char> a(image.rawData.size());
         for (int i = 0; i < image.height; i++) {
             for (int j = 0; j < image.width; j++) {
                 int index = image.channels * (j + image.width * i);
                 int hilbidx = image.channels * gilbidx(j, i, image.width, image.height);
-
+                
                 for (int k = 0; k < image.channels; k++) {
-                    double val = std::abs(b[hilbidx + k])/(double)b.size();
-                    image.rawData[index + k] = (unsigned char)std::clamp(val, 0.0, 255.0);
+                a[hilbidx + k] = image.rawData[index + k];
+                }
+            }
+            }
+        b.reserve(image.rawData.size());
+        for (unsigned char i : a) {
+            b.emplace_back((double)i, 0.0);
+        }
+        
+        
+        FFT::forward(b);
+        
+        
+        std::vector<std::tuple<std::complex<double>, size_t>> filterlist(b.size());
+        for (size_t i = 0; i < filterlist.size(); i++) {
+            filterlist[i] = std::make_tuple(b[i], i);
+        }
+        
+        std::cout << "keepfrac: " << keepfrac << "\n";
+        
+        //sort by amplitude
+        std::sort(filterlist.begin(), filterlist.end(), 
+            [](const std::tuple<std::complex<double>, size_t>& a, const std::tuple<std::complex<double>, size_t>& b) {
+                return abs(std::get<0>(a)) > abs(std::get<0>(b));
+            });
+        
+        //replace smallest amplitudes with 0
+        for (size_t i = (double)filterlist.size() / keepfrac; i < filterlist.size(); i++) {
+            std::get<0>(filterlist[i]) = 0;
+        }
+        
+        //sort by frequency
+        std::sort(filterlist.begin(), filterlist.end(),
+        [](const std::tuple<std::complex<double>, size_t>& a, const std::tuple<std::complex<double>, size_t>& b) {
+            return std::get<1>(a) < std::get<1>(b);
+        });
+        for (size_t i = 0; i < filterlist.size(); i++) {
+            b[i] = std::get<0>(filterlist[i]);
+        }
+        
+        
+        FFT::backward(b);
+        
+        // write back using the real part, normalize and clamp.
+        // If your FFT::backward already normalizes the inverse transform, remove the divide by b.size().
+        for (size_t i = 0; i < a.size(); ++i) {
+            double val = b[i].real();
+            val /= static_cast<double>(b.size()); // normalize inverse FFT
+            long iv = std::lround(val);
+            if (iv < 0) iv = 0;
+            else if (iv > 255) iv = 255;
+            a[i] = static_cast<unsigned char>(iv);
+        }
+    
+        for (int i = 0; i < image.height; i++) {
+            for (int j = 0; j < image.width; j++) {
+                int index = image.channels * (j + image.width * i);
+                int hilbidx = image.channels * gilbidx(j, i, image.width, image.height);
+                
+                for (int k = 0; k < image.channels; k++) {
+                    image.rawData[index + k] = a[hilbidx + k];
                 }
             }
         }
-
-        std::string num = std::to_string(i);
+    
+        std::string num = std::to_string((long)keepfrac);
         while (num.size() < 5) num = "0" + num;
-        image.savePPM("frame_" + num + ".ppm");
+        image.savePPM(num + ".ppm");
     }
+    
 }
