@@ -117,6 +117,7 @@ public:
     void loadImage(const std::string& path) {
         unsigned char* temp = stbi_load(path.c_str(), &width, &height, &channels, 3);
         if (temp) {
+            channels = 3;
             length = width * height;
             rawLength = length * channels;
             rawData.resize(rawLength);
