@@ -31,6 +31,8 @@ void FFT::init(size_t N) {
         FFTW_BACKWARD,
         FFTW_ESTIMATE
     );
+
+    fftw_print_plan(forward_plan);
 }
 
 void FFT::forward(std::vector<std::complex<double>>& data) {

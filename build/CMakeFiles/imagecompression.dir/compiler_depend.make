@@ -296,6 +296,7 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /home/samb/CPPprojects/imagecompression/include/fftwrap.hpp \
   /home/samb/CPPprojects/imagecompression/include/hilbert.hpp \
   /home/samb/CPPprojects/imagecompression/include/stb_image.h \
+  /home/samb/CPPprojects/imagecompression/include/threadpool.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
@@ -347,6 +348,7 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/include/bits/select-decl.h \
   /usr/include/bits/select.h \
   /usr/include/bits/select2.h \
+  /usr/include/bits/semaphore.h \
   /usr/include/bits/setjmp.h \
   /usr/include/bits/stdint-intn.h \
   /usr/include/bits/stdint-least.h \
@@ -428,6 +430,7 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/include/math.h \
   /usr/include/pthread.h \
   /usr/include/sched.h \
+  /usr/include/semaphore.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
   /usr/include/stdio.h \
@@ -438,6 +441,7 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/include/sys/select.h \
   /usr/include/sys/single_threaded.h \
   /usr/include/sys/syscall.h \
+  /usr/include/sys/time.h \
   /usr/include/sys/types.h \
   /usr/include/syscall.h \
   /usr/include/time.h \
@@ -447,6 +451,7 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/emmintrin.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/algorithm \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/array \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/atomic \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/backward/auto_ptr.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/backward/binders.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bit \
@@ -456,7 +461,9 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/allocated_ptr.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/allocator.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_base.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_futex.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_lockfree_defines.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_timed_wait.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_wait.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/basic_ios.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/basic_ios.tcc \
@@ -465,12 +472,16 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/char_traits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/charconv.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/chrono.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/chrono_io.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/codecvt.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/concept_check.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/cpp_type_traits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/cxxabi_forced.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/cxxabi_init_exception.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/deque.tcc \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/elements_of.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/enable_special_members.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/erase_if.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/exception.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/exception_defines.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/exception_ptr.h \
@@ -479,6 +490,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/functexcept.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/functional_hash.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/hash_bytes.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/hashtable.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/hashtable_policy.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/invoke.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ios_base.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/istream.tcc \
@@ -494,10 +507,13 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/max_size_type.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/memory_resource.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/memoryfwd.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/mofunc_impl.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/monostate.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/move.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/move_only_function.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/nested_exception.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/new_allocator.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/node_handle.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ostream.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ostream.tcc \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ostream_insert.h \
@@ -506,6 +522,7 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/postypes.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/predefined_ops.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ptr_traits.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/quoted_string.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/range_access.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ranges_algo.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ranges_algobase.h \
@@ -515,24 +532,30 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ranges_util.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/refwrap.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/requires_hosted.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/semaphore_base.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/shared_ptr.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/shared_ptr_atomic.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/shared_ptr_base.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/specfun.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/sstream.tcc \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_abs.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_function.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_mutex.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_thread.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_algo.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_algobase.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_bvector.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_construct.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_deque.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_function.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_heap.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_iterator.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_iterator_base_funcs.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_iterator_base_types.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_pair.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_queue.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_raw_storage_iter.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_relops.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_tempbuf.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_uninitialized.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_vector.h \
@@ -541,11 +564,13 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/streambuf_iterator.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/string_view.tcc \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stringfwd.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/this_thread_sleep.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unicode-data.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unicode.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/uniform_int_dist.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unique_lock.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unique_ptr.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unordered_map.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/uses_allocator.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/uses_allocator_args.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/utility.h \
@@ -554,12 +579,14 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cctype \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cerrno \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/charconv \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/chrono \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/climits \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/clocale \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cmath \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/compare \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/complex \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/concepts \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/condition_variable \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cstddef \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cstdint \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cstdio \
@@ -569,6 +596,7 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cwctype \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/debug/assertions.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/debug/debug.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/deque \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/exception \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/aligned_buffer.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/alloc_traits.h \
@@ -579,7 +607,10 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/type_traits.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/format \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/fstream \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/functional \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/future \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/initializer_list \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/iomanip \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ios \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/iosfwd \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/iostream \
@@ -598,15 +629,20 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/pstl/glue_algorithm_defs.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/pstl/glue_memory_defs.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/pstl/pstl_config.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/queue \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ranges \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ratio \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/semaphore \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/span \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/sstream \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/stdexcept \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/stdlib.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/stop_token \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/streambuf \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/string \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/string_view \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/system_error \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/thread \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/bessel_function.tcc \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/beta_function.tcc \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/ell_integral.tcc \
@@ -622,6 +658,9 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: /home/samb/CPPprojects/imagecomp
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tuple \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/type_traits \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/typeinfo \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/unordered_map \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/utility \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/variant \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/vector \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu/bits/atomic_word.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu/bits/basic_file.h \
@@ -705,7 +744,11 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu/bits/basic_file.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/variant:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/stdlib.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/queue:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/pstl/glue_algorithm_defs.h:
 
@@ -717,23 +760,47 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/aligned_buffer.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/deque:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/condition_variable:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/climits:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/chrono:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unique_ptr.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/this_thread_sleep.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stream_iterator.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_relops.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_raw_storage_iter.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_queue.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_deque.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/shared_ptr_base.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/semaphore_base.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/iomanip:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ranges_uninitialized.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ranges_algo.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/quoted_string.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/out_ptr.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/hashtable_policy.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/fstream.tcc:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/deque.tcc:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_wait.h:
 
@@ -749,6 +816,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/include/sys/syscall.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ranges:
+
 /usr/include/strings.h:
 
 /usr/include/string.h:
@@ -758,6 +827,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 /usr/include/limits.h:
 
 /usr/include/bits/xopen_lim.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/utility:
 
 /usr/include/bits/unistd_ext.h:
 
@@ -789,6 +860,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu/bits/ctype_base.h:
 
+/usr/include/semaphore.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu/bits/cpu_defines.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu/bits/c++locale.h:
@@ -807,6 +880,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/type_traits:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/hashtable.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tuple:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/special_function_util.h:
@@ -814,6 +889,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/riemann_zeta.tcc:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/poly_laguerre.tcc:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/stop_token:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/poly_hermite.tcc:
 
@@ -838,6 +915,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 /usr/include/bits/timex.h:
 
 /usr/include/bits/errno.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_function.h:
 
 /usr/include/bits/posix1_lim.h:
 
@@ -947,6 +1026,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/include/linux/posix_types.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unordered_map.h:
+
 /usr/include/bits/libc-header-start.h:
 
 /usr/include/math.h:
@@ -977,6 +1058,10 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/include/bits/fp-fast.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/move_only_function.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/atomic:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/x86_64-pc-linux-gnu/bits/gthr.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/streambuf_iterator.h:
@@ -1001,6 +1086,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/include/bits/typesizes.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_timed_wait.h:
+
 /usr/include/bits/cpu-set.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/backward/binders.h:
@@ -1019,6 +1106,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/include/bits/stdlib-float.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/thread:
+
 /usr/include/assert.h:
 
 /usr/include/bits/types/locale_t.h:
@@ -1035,11 +1124,15 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/include/linux/sched/types.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/functional:
+
 /usr/include/bits/environments.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/max_size_type.h:
 
 /usr/include/bits/types/struct_FILE.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/chrono_io.h:
 
 /usr/include/bits/iscanonical.h:
 
@@ -1050,6 +1143,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ctime:
 
 /usr/lib64/libfftw3.so:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/semaphore:
 
 /usr/include/alloca.h:
 
@@ -1171,6 +1266,10 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/cxxabi_init_exception.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/unordered_map:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/elements_of.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/initializer_list:
 
 /usr/include/features.h:
@@ -1213,6 +1312,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ranges_base.h:
 
+/usr/include/bits/semaphore.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ostream:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/basic_string.h:
@@ -1227,9 +1328,15 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/concept_check.h:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/erase_if.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/cpp_type_traits.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/numeric_traits.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_thread.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/node_handle.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/enable_special_members.h:
 
@@ -1261,6 +1368,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/iterator_concepts.h:
 
+/usr/include/sys/time.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/locale_classes.h:
 
 /usr/include/bits/types/mbstate_t.h:
@@ -1279,6 +1388,8 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o:
 
 CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o:
 
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/future:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/type_traits.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ostream.h:
@@ -1288,6 +1399,8 @@ CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o:
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/parse_numbers.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/pstl/execution_defs.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/mofunc_impl.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/tr1/beta_function.tcc:
 
@@ -1401,11 +1514,15 @@ CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/cstdint:
 
+/home/samb/CPPprojects/imagecompression/include/threadpool.h:
+
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/debug/debug.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/exception:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/alloc_traits.h:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_futex.h:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ext/atomicity.h:
 

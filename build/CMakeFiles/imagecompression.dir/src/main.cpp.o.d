@@ -265,6 +265,19 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/ranges_uninitialized.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/out_ptr.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/pstl/glue_memory_defs.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/thread \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/stop_token \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/atomic \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_thread.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/semaphore \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/semaphore_base.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/chrono.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ratio \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/parse_numbers.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_timed_wait.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/this_thread_sleep.h \
+ /usr/include/sys/time.h /usr/include/semaphore.h \
+ /usr/include/bits/semaphore.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/vector \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_vector.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_bvector.h \
@@ -277,9 +290,6 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: \
  /usr/include/fftw3.h \
  /home/samb/CPPprojects/imagecompression/include/fftwrap.hpp \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/mutex \
- /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/chrono.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ratio \
- /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/parse_numbers.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unique_lock.h \
  /home/samb/CPPprojects/imagecompression/include/stb_image.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/stdlib.h \
@@ -291,4 +301,32 @@ CMakeFiles/imagecompression.dir/src/main.cpp.o: \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/emmintrin.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/xmmintrin.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/mmintrin.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/mm_malloc.h
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/mm_malloc.h \
+ /home/samb/CPPprojects/imagecompression/include/threadpool.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/chrono \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/chrono_io.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/iomanip \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/quoted_string.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/condition_variable \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/functional \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/std_function.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/unordered_map \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/unordered_map.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/hashtable.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/hashtable_policy.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/node_handle.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/erase_if.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/move_only_function.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/mofunc_impl.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/future \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/atomic_futex.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/queue \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/deque \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_deque.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/deque.tcc \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_queue.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/ranges \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/utility \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/stl_relops.h \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/variant \
+ /usr/lib/gcc/x86_64-pc-linux-gnu/15/include/g++-v15/bits/elements_of.h
