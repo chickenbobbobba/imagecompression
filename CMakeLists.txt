@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MAKE_PROGRAM imagecompression)
 
-add_compile_options(-Wall -Wextra -Wpedantic -O3 -march=native)
+add_compile_options(-Wall -Wextra -Wpedantic -O3 -march=native -ffast-math -funsafe-math-optimizations)
 
 file(GLOB_RECURSE APP_SOURCES "${CMAKE_SOURCE_DIR}/src/*")
 

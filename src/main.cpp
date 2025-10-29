@@ -1,6 +1,9 @@
 #include <algorithm>
+#include <climits>
+#include <cmath>
 #include <complex>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -9,6 +12,11 @@
 #include <fstream>
 #include <fft.h>
 
+
+#include <threadpool.h>
+ThreadPool pool(std::thread::hardware_concurrency());
+
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -16,38 +24,162 @@ class Image {
 public:
     int width;
     int height;
-    int channels;
-    std::vector<unsigned char> image2d; // standard linear mapping
-    std::vector<unsigned char> image1d; // hilbert mapping
-    std::vector<std::complex<double>> waves;
+    int channels = 3;
+    long segLen;
+    long colreduc;
+    size_t length;
+    size_t rawLength;
 
+    std::vector<unsigned char> rawData; // standard linear mapping
+    std::vector<unsigned char> image1d; // hilbert mapping
+
+    class Segment {
+        private:
+        Image& parent;
+        public:
+        Segment(Image& parent_, size_t segLen, size_t index, long yScale, long cScale) : parent(parent_){
+            Y.resize(segLen/yScale);
+            Cb.resize(segLen/cScale);
+            Cr.resize(segLen/cScale);
+
+            if (parent.image1d.size() == 0) throw;
+
+            //fill Y
+            for (auto i = index; i < index + segLen; i += parent.channels * yScale) {
+                Y.push_back(0.299 * parent.image1d[i] + 0.587 * parent.image1d[i+1] + 0.114 * parent.image1d[i+2]);
+            }
+            //fill Cb Cr
+            for (auto i = index; i < index + segLen; i += parent.channels * cScale) {
+                Cb.push_back(128 - 0.168736 * parent.image1d[i] - 0.331264 * parent.image1d[i+1] + 0.5 * parent.image1d[i+2]);
+                Cr.push_back(128 + 0.5 * parent.image1d[i] - 0.418688 * parent.image1d[i+1] - 0.081312 * parent.image1d[i+2]);
+            }
+        }
+        std::vector<unsigned char> Y;
+        std::vector<unsigned char> Cb;
+        std::vector<unsigned char> Cr;
+
+        std::vector<std::complex<double>> wavY;
+        std::vector<std::complex<double>> wavCb;
+        std::vector<std::complex<double>> wavCr;
+
+        std::vector<std::complex<double>> getFreqs(const std::vector<unsigned char>& data) {
+            std::vector<std::complex<double>> waves(data.size());
+            for (unsigned char i : data) {
+                waves.emplace_back((double)i, 0.0);
+            }
+            return FFT(waves);
+        }
+
+        std::vector<unsigned char> getData(const std::vector<std::complex<double>>& data) {
+            std::vector<unsigned char> raw(data.size());
+
+            auto temp = IFFT(data);
+
+            for (size_t i = 0; i < temp.size(); i++) {
+                raw[i] = (unsigned char)std::min(255L, (long)abs(temp[i]));
+            }
+            return raw;
+        }
+
+        std::vector<std::complex<double>> compress(const std::vector<unsigned char>& data) {
+            double twiddle = 1;
+
+            auto waves = getFreqs(data);
+
+            double avg = 0;
+            for (const auto& i : waves) {
+                avg += abs(i);
+            }
+            avg /= waves.size() * twiddle;
+
+            for (auto& i : waves) {
+                if (abs(i) < avg) i *= 0;
+            }
+            return waves;
+        }
+
+        void compressAll() {
+            wavY = compress(Y);
+            wavCb = compress(Cb);
+            wavCr = compress(Cr);
+        }
+    };
+
+    std::vector<Segment> segments;
+
+    void compressSegments() {
+        for (auto& i : segments) {
+            i.compressAll();
+        }
+    }
+    
     void loadImage(const std::string& path) {
         unsigned char* temp = stbi_load(path.c_str(), &width, &height, &channels, 3);
         if (temp) {
-            image2d.assign(temp, temp + width * height * channels);
+            length = width * height;
+            rawLength = length * channels;
+            rawData.resize(rawLength);
+            rawData.assign(temp, temp + rawLength);
+            STBI_FREE(temp);
         } else {
             std::cout << "error loading image!\n";
             throw;
         }
-        std::cout << "width: " << width << "\nheight: " << height << "\nchannels: " << channels << "\n";
+        std::cout << "width: " << width << "\nheight: " << height << "\npixels: " << length << "\nchannels: " << channels << "\n";
+    }
+
+    void segmentRaw() {
+        segLen = 64 * channels * sqrt(length); //todo : make adaptive probably
+        size_t i = 0;
+        long count = 0;
+        while (i < rawLength) {
+            count++;
+            if (i + segLen > rawLength) segLen = rawLength - i;
+            segments.emplace_back(*this, segLen, i, 1, 16);
+            i += segLen;
+        }
+        std::cout << "created " << count << " segments\n";
+    }
+
+    void rejoinSegments() {
+
+    }
+
+    void saveNift(const std::string& path) {
+        /*
+        spec:
+        Nxn sized hIlbert and Fourier Transform
+        greyscale, rgb and rgba support
+        per image variable size transformed coeffs
+
+        bits : what its for
+
+        u4 : block size is (image size)^(1/2)
+        u32 : width
+        u32 : height
+        u2 : format (0 = grey, 2 = rgb, 3 = rgba)
+
+        u4 : num bits for transform real coeffs -1 (so 1111 -> 10000 -> 16 bits of precision, 0000 -> 0001 -> 1 bit of precision)
+        u4 : same for imag coeffs
+
+        */
     }
 
     void savePPM(const std::string& path) {
-        assert(image2d.size() == width * height * channels);
         std::ofstream out(path, std::ios::binary);
         out << "P6\n" << width << " " << height << "\n255\n";
-        out.write(reinterpret_cast<char*>(image2d.data()), image2d.size());
+        out.write(reinterpret_cast<char*>(rawData.data()), rawData.size());
     }
 
     void hilbTo1d() {
-        image1d.resize(width * height * channels);
+        image1d.resize(rawLength);
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 int index = channels * (j + width * i);
                 int hilbidx = channels * gilbidx(j, i, width, height);
 
                 for (int k = 0; k < channels; k++) {
-                    image1d[hilbidx + k] = image2d[index + k];
+                    image1d[hilbidx + k] = rawData[index + k];
                 }
             }
         }
@@ -60,73 +192,41 @@ public:
                 int hilbidx = channels * gilbidx(j, i, width, height);
 
                 for (int k = 0; k < channels; k++) {
-                    image2d[index + k] = image1d[hilbidx + k];
+                    rawData[index + k] = image1d[hilbidx + k];
                 }
             }
         }
     }
 
-    void image1dToWaves() {
-        waves.reserve(image1d.size());
-
-        for (char i : image1d) {
-            waves.emplace_back((double)i, 0.0);
-        }
-
-        waves = FFT(waves);
-    }
-
-    void wavesToImage1d() {
-        if (image1d.size() < waves.size())
-            image1d.resize(waves.size());
-
-        waves = IFFT(waves);
-
-        for (size_t i = 0; i < waves.size(); i++) {
-            image1d[i] = (unsigned char)std::min(255L, (long)abs(waves[i]));
-            // image1d[i] = image1d[i] + 128 * (i % 2);
-        }
-    }
 };
 
-int main(int argc, char** argv){
-    double keepfrac = 1.0f;
 
+
+int main(int argc, char** argv) {
     Image image;
-    std::string filepath = "../resources/mandelbrot.png";
+    std::string filepath = "";
     if (argc > 1) filepath = argv[1];
     std::cout << "filepath: " << filepath << "\n";
-    std::cout << "reading...\n";
     image.loadImage(filepath);
-    std::cout << "encoding...\n";
-    image.hilbTo1d();
-    std::cout << "FFT...\n";
-    image.image1dToWaves();
-    std::cout << "truncating smallest...\n";
-    // {
 
-    //     std::vector<std::tuple<std::complex<double>, size_t>> filterlist(image.image1d.size());
-    //     for (size_t i = 0; i < filterlist.size(); i++) {
-    //         filterlist[i] = std::make_tuple(image.image1d[i], i);
-    //     }
-    //     std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return abs(std::get<0>(a)) > abs(std::get<0>(b));});
-    //     for (size_t i = (double)filterlist.size() / keepfrac; i < filterlist.size(); i++) {
-    //         std::get<0>(filterlist[i]) = 0;
-    //     }
-        
-    //     std::sort(filterlist.begin(), filterlist.end(), [](const std::tuple<std::complex<double>&, size_t>& a, const std::tuple<std::complex<double>&, size_t>& b) {return std::get<1>(a) < std::get<1>(b);});
-    //     for (size_t i = 0; i < filterlist.size(); i++) {
-    //         image.image1d[i] = std::min(255, (int)std::get<0>(filterlist[i]).real());
-    //     }
+    auto& a = image.rawData;
+    std::vector<std::complex<double>> b;
+    b.reserve(a.size());
+    // Fill vector properly
+    for (unsigned char i : a) {
+        b.emplace_back((double)i, 0.0);
+    }
     
-    // }
-    std::cout << "reconstructing...\n";
-    image.wavesToImage1d();
-
-    std::cout << "decoding...\n";
-    image.hilbTo2d();
-    std::cout << "writing...\n";
-    std::string outpath = "out.ppm";
-    image.savePPM(outpath);
-
+    b = FFT(b);
+    auto temp = IFFT(b);
+    
+    image.rawData.resize(temp.size());
+    // Scale values properly
+    for (size_t i = 0; i < temp.size(); i++) {
+        double val = std::abs(temp[i]);
+        image.rawData[i] = (unsigned char)std::clamp(val, 0.0, 255.0);
+    }
+    
+    image.savePPM("out.ppm");
+    return 0;
 }

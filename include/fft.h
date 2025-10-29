@@ -31,13 +31,20 @@ std::vector<std::complex<double>> FFT_ip(const std::vector<std::complex<double>>
         result[revbits(i, rotpoint)] = data[i];
     }
     
+    std::vector<std::complex<double>> twiddles(n / 2);
+    for (size_t k = 0; k < n / 2; ++k)
+        twiddles[k] = std::polar(1.0, -2.0 * M_PI * k / n);
+
     for (int len = 2; len <= n; len *= 2) {
         for (int batchPtr = 0; batchPtr < n; batchPtr += len) {
             int half = len/2;
+            size_t step = n / len;
+
             for (int j = 0; j < half; j++) {
                 int evenIdx = batchPtr + j;
                 int oddIdx  = evenIdx + half;
-                auto twiddle = std::polar(1.0, -2.0 * M_PI * j / len);
+
+                auto twiddle = twiddles[j * step];
 
                 auto u = result[evenIdx];
                 auto v = result[oddIdx] * twiddle;

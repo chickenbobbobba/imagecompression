@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/samb/CPPprojects/imagecompression/include
 
-CXX_FLAGS = -g -std=c++23 -Wall -Wextra -Wpedantic -O3 -march=native
+CXX_FLAGS = -g -std=c++23 -Wall -Wextra -Wpedantic -O3 -march=native -ffast-math -funsafe-math-optimizations
 
