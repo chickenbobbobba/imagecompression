@@ -4,5 +4,11 @@
   "command": "/usr/bin/c++  -I/home/samb/CPPprojects/imagecompression/include -g -std=c++23 -Wall -Wextra -Wpedantic -O3 -march=native -ffast-math -funsafe-math-optimizations -o CMakeFiles/imagecompression.dir/src/main.cpp.o -c /home/samb/CPPprojects/imagecompression/src/main.cpp",
   "file": "/home/samb/CPPprojects/imagecompression/src/main.cpp",
   "output": "CMakeFiles/imagecompression.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/samb/CPPprojects/imagecompression/build",
+  "command": "/usr/bin/c++  -I/home/samb/CPPprojects/imagecompression/include -g -std=c++23 -Wall -Wextra -Wpedantic -O3 -march=native -ffast-math -funsafe-math-optimizations -o CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o -c /home/samb/CPPprojects/imagecompression/src/fftwrap.cpp",
+  "file": "/home/samb/CPPprojects/imagecompression/src/fftwrap.cpp",
+  "output": "CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o"
 }
 ]

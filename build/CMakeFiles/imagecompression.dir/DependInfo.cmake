@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/samb/CPPprojects/imagecompression/src/fftwrap.cpp" "CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o" "gcc" "CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o.d"
   "/home/samb/CPPprojects/imagecompression/src/main.cpp" "CMakeFiles/imagecompression.dir/src/main.cpp.o" "gcc" "CMakeFiles/imagecompression.dir/src/main.cpp.o.d"
   "" "imagecompression" "gcc" "CMakeFiles/imagecompression.dir/link.d"
   )

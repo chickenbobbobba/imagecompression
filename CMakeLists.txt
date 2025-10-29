@@ -9,7 +9,13 @@ set(CMAKE_MAKE_PROGRAM imagecompression)
 
 add_compile_options(-Wall -Wextra -Wpedantic -O3 -march=native -ffast-math -funsafe-math-optimizations)
 
-file(GLOB_RECURSE APP_SOURCES "${CMAKE_SOURCE_DIR}/src/*")
+find_package(FFTW3 REQUIRED)
 
-add_executable(imagecompression ${APP_SOURCES})
-target_include_directories(imagecompression PRIVATE ${CMAKE_SOURCE_DIR}/include)
+set(SOURCES
+    src/main.cpp
+    src/fftwrap.cpp
+)
+
+add_executable(imagecompression ${SOURCES})
+target_include_directories(imagecompression PRIVATE ${CMAKE_SOURCE_DIR}/include ${FFTW3_INCLUDE_DIRS})
+target_link_libraries(imagecompression PRIVATE fftw3 pthread)

@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/imagecompression.dir/link.d"
+  "CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o"
+  "CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o.d"
   "CMakeFiles/imagecompression.dir/src/main.cpp.o"
   "CMakeFiles/imagecompression.dir/src/main.cpp.o.d"
   "imagecompression"

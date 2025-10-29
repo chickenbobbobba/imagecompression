@@ -3,6 +3,9 @@ imagecompression: \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/../../../../lib64/crti.o \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/crtbeginS.o \
   CMakeFiles/imagecompression.dir/src/main.cpp.o \
+  CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/../../../../lib64/libfftw3.so \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15/../../../../lib64/libpthread.a \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/libstdc++.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/../../../../lib64/libm.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15/../../../../lib64/libm.so \
@@ -38,6 +41,12 @@ imagecompression: \
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/crtbeginS.o:
 
 CMakeFiles/imagecompression.dir/src/main.cpp.o:
+
+CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/../../../../lib64/libfftw3.so:
+
+/usr/lib/gcc/x86_64-pc-linux-gnu/15/../../../../lib64/libpthread.a:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/15/libstdc++.so:
 

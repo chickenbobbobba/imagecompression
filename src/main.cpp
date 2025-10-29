@@ -8,17 +8,16 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include <hilbert.h>
+#include <hilbert.hpp>
 #include <fstream>
-#include <fft.h>
 
-
-#include <threadpool.h>
-ThreadPool pool(std::thread::hardware_concurrency());
-
+#include <fftw3.h>
+#include <fftwrap.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+
 
 class Image {
 public:
@@ -62,56 +61,56 @@ public:
         std::vector<std::complex<double>> wavCb;
         std::vector<std::complex<double>> wavCr;
 
-        std::vector<std::complex<double>> getFreqs(const std::vector<unsigned char>& data) {
-            std::vector<std::complex<double>> waves(data.size());
-            for (unsigned char i : data) {
-                waves.emplace_back((double)i, 0.0);
-            }
-            return FFT(waves);
-        }
+        // std::vector<std::complex<double>> getFreqs(const std::vector<unsigned char>& data) {
+        //     std::vector<std::complex<double>> waves(data.size());
+        //     for (unsigned char i : data) {
+        //         waves.emplace_back((double)i, 0.0);
+        //     }
+        //     return FFT::forward(waves);
+        // }
 
-        std::vector<unsigned char> getData(const std::vector<std::complex<double>>& data) {
-            std::vector<unsigned char> raw(data.size());
+        // std::vector<unsigned char> getData(const std::vector<std::complex<double>>& data) {
+        //     std::vector<unsigned char> raw(data.size());
 
-            auto temp = IFFT(data);
+        //     auto temp = FFT::backward(data);
 
-            for (size_t i = 0; i < temp.size(); i++) {
-                raw[i] = (unsigned char)std::min(255L, (long)abs(temp[i]));
-            }
-            return raw;
-        }
+        //     for (size_t i = 0; i < temp.size(); i++) {
+        //         raw[i] = (unsigned char)std::min(255L, (long)abs(temp[i]));
+        //     }
+        //     return raw;
+        // }
 
-        std::vector<std::complex<double>> compress(const std::vector<unsigned char>& data) {
-            double twiddle = 1;
+        // std::vector<std::complex<double>> compress(const std::vector<unsigned char>& data) {
+        //     double twiddle = 1;
 
-            auto waves = getFreqs(data);
+        //     auto waves = getFreqs(data);
 
-            double avg = 0;
-            for (const auto& i : waves) {
-                avg += abs(i);
-            }
-            avg /= waves.size() * twiddle;
+        //     double avg = 0;
+        //     for (const auto& i : waves) {
+        //         avg += abs(i);
+        //     }
+        //     avg /= waves.size() * twiddle;
 
-            for (auto& i : waves) {
-                if (abs(i) < avg) i *= 0;
-            }
-            return waves;
-        }
+        //     for (auto& i : waves) {
+        //         if (abs(i) < avg) i *= 0;
+        //     }
+        //     return waves;
+        // }
 
-        void compressAll() {
-            wavY = compress(Y);
-            wavCb = compress(Cb);
-            wavCr = compress(Cr);
-        }
+        // void compressAll() {
+        //     wavY = compress(Y);
+        //     wavCb = compress(Cb);
+        //     wavCr = compress(Cr);
+        // }
     };
 
     std::vector<Segment> segments;
 
-    void compressSegments() {
-        for (auto& i : segments) {
-            i.compressAll();
-        }
-    }
+    // void compressSegments() {
+    //     for (auto& i : segments) {
+    //         i.compressAll();
+    //     }
+    // }
     
     void loadImage(const std::string& path) {
         unsigned char* temp = stbi_load(path.c_str(), &width, &height, &channels, 3);
@@ -203,27 +202,26 @@ public:
 
 
 int main(int argc, char** argv) {
+    
     Image image;
     std::string filepath = "";
     if (argc > 1) filepath = argv[1];
     std::cout << "filepath: " << filepath << "\n";
     image.loadImage(filepath);
 
-    auto& a = image.rawData;
+    FFT::init((size_t)image.rawData.size());
+    
     std::vector<std::complex<double>> b;
-    b.reserve(a.size());
-    // Fill vector properly
-    for (unsigned char i : a) {
+    b.reserve(image.rawData.size());
+    for (unsigned char i : image.rawData) {
         b.emplace_back((double)i, 0.0);
     }
     
-    b = FFT(b);
-    auto temp = IFFT(b);
+    FFT::forward(b);
+    FFT::backward(b);
     
-    image.rawData.resize(temp.size());
-    // Scale values properly
-    for (size_t i = 0; i < temp.size(); i++) {
-        double val = std::abs(temp[i]);
+    for (size_t i = 0; i < b.size(); i++) {
+        double val = std::abs(b[i])/(double)b.size();
         image.rawData[i] = (unsigned char)std::clamp(val, 0.0, 255.0);
     }
     

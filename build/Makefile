@@ -129,6 +129,30 @@ imagecompression/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/imagecompression.dir/build.make CMakeFiles/imagecompression.dir/build
 .PHONY : imagecompression/fast
 
+src/fftwrap.o: src/fftwrap.cpp.o
+.PHONY : src/fftwrap.o
+
+# target to build an object file
+src/fftwrap.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/imagecompression.dir/build.make CMakeFiles/imagecompression.dir/src/fftwrap.cpp.o
+.PHONY : src/fftwrap.cpp.o
+
+src/fftwrap.i: src/fftwrap.cpp.i
+.PHONY : src/fftwrap.i
+
+# target to preprocess a source file
+src/fftwrap.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/imagecompression.dir/build.make CMakeFiles/imagecompression.dir/src/fftwrap.cpp.i
+.PHONY : src/fftwrap.cpp.i
+
+src/fftwrap.s: src/fftwrap.cpp.s
+.PHONY : src/fftwrap.s
+
+# target to generate assembly for a file
+src/fftwrap.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/imagecompression.dir/build.make CMakeFiles/imagecompression.dir/src/fftwrap.cpp.s
+.PHONY : src/fftwrap.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... imagecompression"
+	@echo "... src/fftwrap.o"
+	@echo "... src/fftwrap.i"
+	@echo "... src/fftwrap.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
