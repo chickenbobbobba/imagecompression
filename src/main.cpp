@@ -105,6 +105,7 @@ public:
         for (long i = 0; i < count; i++) {
             Subsect temp;
             long start = i * data.size()/count;
+            start -= start % 3;
             long endExclusive = (i+1) * data.size()/count; // exclusive end
             temp.assignRawData(data, start, endExclusive);
             // record the segment bounds
@@ -151,28 +152,41 @@ public:
 
 int main(int argc, char** argv) {
     ThreadPool pool(std::thread::hardware_concurrency());
-    
-    Image image;
-    std::string filepath = "";
-    if (argc > 1) filepath = argv[1];
-    std::cout << "filepath: " << filepath << "\n";
-    image.loadImage(filepath);
-    image.rawToHilb();
-    image.subdivide(image.hilbMap, (long)sqrt(image.rawLength));
+    for(double cut = 0.0; cut <= 10.0; cut += 0.5) {
 
-    for (auto &i : image.subsects) {
-        i.waves = i.toWaves(i.raw);
-
-        double avg = 0; // RMS average
-        for (auto i : i.waves) avg += pow(abs(i), 2);
-        avg /= i.waves.size();
-        avg = sqrt(avg);
-
-        for (auto& i : i.waves) i *= (abs(i) > avg);
-
-        i.raw = i.toData(i.waves);
-        i.integrateRawData(image.hilbMap);
+        
+        Image image;
+        std::string filepath = "";
+        if (argc > 1) filepath = argv[1];
+        std::cout << "filepath: " << filepath << "\n";
+        image.loadImage(filepath);
+        image.rawToHilb();
+        image.subdivide(image.hilbMap, (long)(sqrt(image.rawLength) * log(image.rawLength)));
+        
+        long count = 0;
+        
+        for (auto &i : image.subsects) {
+            i.waves = i.toWaves(i.raw);
+            
+            double avg = 0; // RMS average
+            for (auto i : i.waves) avg += pow(abs(i), 0.5);
+            avg /= i.waves.size();
+            avg = pow(avg, 2) * cut;
+            
+            for (auto& i : i.waves) {
+                i *= (abs(i) > avg);
+                if (i != 0.0) count++;
+            }
+            
+            i.raw = i.toData(i.waves);
+            i.integrateRawData(image.hilbMap);
+        }
+        
+        std::string retention = std::to_string((double)count/image.rawLength);
+        std::string cutstr = std::to_string(cut);
+        cutstr.resize(3);
+        
+        image.hilbToRaw();
+        image.savePPM("img" + cutstr + "-" + retention + ".ppm");
     }
-    image.hilbToRaw();
-    image.savePPM("img.ppm");
 }
