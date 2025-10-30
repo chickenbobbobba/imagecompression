@@ -46,22 +46,53 @@ class Subsect {
         memcpy(data.data() + start, raw.data(), raw.size());
     }
 
-    void toYCbCr(long yScale, long cScale) {
+    void toYCbCr(size_t yScale, size_t cScale) {
         size_t segLen = raw.size();
-        Y.reserve(segLen/yScale);
-        Cb.reserve(segLen/cScale);
-        Cr.reserve(segLen/cScale);
-        // fill Y
-        for (size_t i = 0; i + 2 < segLen; i += 3 * yScale) {
-            assert(i + 2 < segLen);
-            Y.push_back(0.299 * raw[i] + 0.587 * raw[i+1] + 0.114 * raw[i+2]);
+        size_t numPixels = segLen / 3;
+        
+        Y.reserve(numPixels / yScale);
+        Cb.reserve(numPixels / cScale);
+        Cr.reserve(numPixels / cScale);
+        
+        // fill y
+        for (size_t px = 0; px < numPixels; px += yScale) {
+            double r_sum = 0, g_sum = 0, b_sum = 0;
+            size_t count = 0;
+            
+            for (size_t j = 0; j < yScale && (px + j) < numPixels; j++) {
+                size_t idx = (px + j) * 3;
+                r_sum += pow(raw[idx + 0], 2.2);
+                g_sum += pow(raw[idx + 1], 2.2);
+                b_sum += pow(raw[idx + 2], 2.2);
+                count++;
+            }
+            
+            double r_avg = pow(r_sum / count, 1.0/2.2);
+            double g_avg = pow(g_sum / count, 1.0/2.2);
+            double b_avg = pow(b_sum / count, 1.0/2.2);
+            
+            Y.push_back(0.299 * r_avg + 0.587 * g_avg + 0.114 * b_avg);
         }
         
         // fill Cb Cr
-        for (size_t i = 0; i + 2 < segLen; i += 3 * cScale) {
-            assert(i + 2 < segLen);
-            Cb.push_back(128 - 0.168736 * raw[i] - 0.331264 * raw[i+1] + 0.5 * raw[i+2]);
-            Cr.push_back(128 + 0.5 * raw[i] - 0.418688 * raw[i+1] - 0.081312 * raw[i+2]);
+        for (size_t px = 0; px < numPixels; px += cScale) {
+            double r_sum = 0, g_sum = 0, b_sum = 0;
+            size_t count = 0;
+            
+            for (size_t j = 0; j < cScale && (px + j) < numPixels; j++) {
+                size_t idx = (px + j) * 3;
+                r_sum += pow(raw[idx + 0], 2.2);
+                g_sum += pow(raw[idx + 1], 2.2);
+                b_sum += pow(raw[idx + 2], 2.2);
+                count++;
+            }
+            
+            double r_avg = pow(r_sum / count, 1.0/2.2);
+            double g_avg = pow(g_sum / count, 1.0/2.2);
+            double b_avg = pow(b_sum / count, 1.0/2.2);
+            
+            Cb.push_back(128 - 0.168736 * r_avg - 0.331264 * g_avg + 0.5 * b_avg);
+            Cr.push_back(128 + 0.5 * r_avg - 0.418688 * g_avg - 0.081312 * b_avg);
         }
     }
 
@@ -78,40 +109,36 @@ class Subsect {
 
         FFT::init(Cb.size());
         {
-            size_t oldSize = Cb.size();
-            size_t half = oldSize / 2;
-            
             auto temp = toWaves(Cb);
-            size_t N = temp.size();
+            auto originalSize = temp.size();
             temp.resize(np, {0.0, 0.0});
             
-            for (size_t i = half; i < N; i++) {
-                temp[np - (N - i)] = temp[i];
-                temp[i] = {0.0, 0.0};
+            for (size_t i = 0; i < originalSize; i++) {
+                size_t newIdx = i * np / originalSize;
+                if (newIdx < np) {
+                    temp[newIdx] = temp[i];
+                }
             }
-            
-            double scale = (double)np / (double)oldSize;
-            for (auto& f : temp) f *= scale;
             
             FFT::init(np);
             Cb = toData(temp);
             
+            // Same for Cr channel
             temp = toWaves(Cr);
             temp.resize(np, {0.0, 0.0});
-            
-            for (size_t i = half; i < N; i++) {
-                temp[np - (N - i)] = temp[i];
-                temp[i] = {0.0, 0.0};
+            for (size_t i = 0; i < originalSize; i++) {
+                size_t newIdx = i * np / originalSize;
+                if (newIdx < np) {
+                    temp[newIdx] = temp[i];
+                }
             }
-            
-            for (auto& f : temp) f *= scale;
             Cr = toData(temp);
         }
 
         // Upscale Y the same way as Cb/Cr if needed
         if (!Y.empty() && Y.size() != np) {
             size_t oldY = Y.size();
-            size_t halfY = oldY / 2;
+            size_t halfY = (oldY + 1) / 2;
             auto tempY = toWaves(Y);
             size_t NY = tempY.size();
             tempY.resize(np, {0.0, 0.0});
@@ -162,6 +189,7 @@ class Subsect {
         
         FFT::init(waves.size());
         FFT::forward(waves);
+        for (auto& i : waves) i /= (double)data.size();
         return waves; 
     }
 
@@ -173,10 +201,21 @@ class Subsect {
         FFT::backward(temp);
 
         for (size_t i = 0; i < temp.size(); i++) {
-            raw[i] = (unsigned char) std::clamp((long)(abs(temp[i])/data.size()), 0L, 255L);
+            raw[i] = (unsigned char) std::clamp((long)(abs(temp[i])), 0L, 255L);
         }
 
         return raw;
+    }
+
+    std::vector<unsigned char> encodeBlockData() {
+        /*
+        32 : width
+        32 : height
+        32 : index of 2x8 bit
+        32 : index of 2x6 bit
+        32 : index of 2x4 bit
+        32 : index of 2x2 bit
+        */
     }
 };
 
@@ -269,24 +308,21 @@ int main(int argc, char** argv) {
     if (argc > 1) filepath = argv[1];
     std::cout << "filepath: " << filepath << "\n";
     image.loadImage(filepath);
-    image.rawToHilb();
-    // image.subdivide(image.hilbMap, (long)(pow(image.rawLength, 0.5) * log2(image.rawLength)));
-    // image.subdivide(image.hilbMap, (long)(sqrt(image.rawLength)));
-    // image.subdivide(image.hilbMap, image.rawData.size()/2048);
-    image.subdivide(image.hilbMap, sqrt(image.rawLength) * log2(image.rawLength));
-
     
-    for (auto &i : image.subsects) {
-        i.toYCbCr(1, 8);
-        
-        // auto wavesY = i.toWaves(i.Y);
-        // auto wavesCb = i.toWaves(i.Cb);
-        // auto wavesCr = i.toWaves(i.Cr);
+    // encode
+    image.rawToHilb();
+    image.subdivide(image.hilbMap, sqrt(image.rawLength) * 16);
 
+    for (auto &i : image.subsects) {
+        i.toYCbCr(1, 4);
         
-        // i.Y = i.toData(wavesY);
-        // i.Cb = i.toData(wavesCb);
-        // i.Cr = i.toData(wavesCr);
+        auto wavesY = i.toWaves(i.Y);
+        auto wavesCb = i.toWaves(i.Cb);
+        auto wavesCr = i.toWaves(i.Cr);
+
+        i.Y = i.toData(wavesY);
+        i.Cb = i.toData(wavesCb);
+        i.Cr = i.toData(wavesCr);
         
         if (mode == 'c') {
             for (auto& a : i.Y) a = 128.0;
