@@ -1,13 +1,9 @@
 #include <algorithm>
-#include <climits>
 #include <cmath>
 #include <complex>
 #include <iostream>
-#include <iterator>
-#include <memory>
 #include <string>
 #include <thread>
-#include <tuple>
 #include <unistd.h>
 #include <vector>
 #include <hilbert.hpp>
@@ -21,99 +17,74 @@
 
 #include <threadpool.h>
 
+class Subsect {
+    private:
+    public:
+
+    std::vector<unsigned char> Y;
+    std::vector<unsigned char> Cb;
+    std::vector<unsigned char> Cr;
+
+    std::vector<unsigned char> raw;
+    std::vector<std::complex<double>> waves;
+
+    size_t start;
+    size_t end;
+
+    void assignRawData(const std::vector<unsigned char>& data, size_t start, size_t endExclusive) {
+        if (start > endExclusive || endExclusive > data.size()) {
+            throw std::out_of_range("assignRawData: invalid range");
+        }
+        raw.assign(data.begin() + start, data.begin() + endExclusive);
+        FFT::init(raw.size());
+        this->start = start;
+        this->end = endExclusive;
+    }
+    
+    void integrateRawData(std::vector<unsigned char>& data) {
+        assert(data.size() >= raw.size() + start);
+        memcpy(data.data() + start, raw.data(), raw.size());
+    }
+    
+    std::vector<std::complex<double>> toWaves(const std::vector<unsigned char>& data) {
+        std::vector<std::complex<double>> waves;
+        waves.reserve(data.size());
+        for (unsigned char v : data) {
+            waves.emplace_back((double)v, 0.0);
+        }
+
+        FFT::forward(waves);
+        return waves; 
+    }
+
+    std::vector<unsigned char> toData(const std::vector<std::complex<double>>& data) {
+        std::vector<unsigned char> raw(data.size());
+
+        auto temp = data;
+        FFT::backward(temp);
+
+        for (size_t i = 0; i < temp.size(); i++) {
+            raw[i] = (unsigned char) std::clamp((long)(abs(temp[i])/data.size()), 0L, 255L);
+        }
+
+        return raw;
+    }
+};
+
 class Image {
 public:
     int width;
     int height;
     int channels;
     long segLen;
-    long colreduc;
     size_t length;
     size_t rawLength;
 
     std::vector<unsigned char> rawData; // standard linear mapping
-    std::vector<unsigned char> image1d; // hilbert mapping
+    std::vector<unsigned char> hilbMap; // hilbert mapping
 
-    class Segment {
-        private:
-        Image& parent;
-        public:
-        Segment(Image& parent_, size_t segLen, size_t index, long yScale, long cScale) : parent(parent_){
-            Y.resize(segLen/yScale);
-            Cb.resize(segLen/cScale);
-            Cr.resize(segLen/cScale);
+    std::vector<Subsect> subsects;
 
-            if (parent.image1d.size() == 0) throw;
-
-            //fill Y
-            for (auto i = index; i < index + segLen; i += parent.channels * yScale) {
-                Y.push_back(0.299 * parent.image1d[i] + 0.587 * parent.image1d[i+1] + 0.114 * parent.image1d[i+2]);
-            }
-            //fill Cb Cr
-            for (auto i = index; i < index + segLen; i += parent.channels * cScale) {
-                Cb.push_back(128 - 0.168736 * parent.image1d[i] - 0.331264 * parent.image1d[i+1] + 0.5 * parent.image1d[i+2]);
-                Cr.push_back(128 + 0.5 * parent.image1d[i] - 0.418688 * parent.image1d[i+1] - 0.081312 * parent.image1d[i+2]);
-            }
-        }
-        std::vector<unsigned char> Y;
-        std::vector<unsigned char> Cb;
-        std::vector<unsigned char> Cr;
-
-        std::vector<std::complex<double>> wavY;
-        std::vector<std::complex<double>> wavCb;
-        std::vector<std::complex<double>> wavCr;
-
-        // std::vector<std::complex<double>> getFreqs(const std::vector<unsigned char>& data) {
-        //     std::vector<std::complex<double>> waves(data.size());
-        //     for (unsigned char i : data) {
-        //         waves.emplace_back((double)i, 0.0);
-        //     }
-        //     return FFT::forward(waves);
-        // }
-
-        // std::vector<unsigned char> getData(const std::vector<std::complex<double>>& data) {
-        //     std::vector<unsigned char> raw(data.size());
-
-        //     auto temp = FFT::backward(data);
-
-        //     for (size_t i = 0; i < temp.size(); i++) {
-        //         raw[i] = (unsigned char)std::min(255L, (long)abs(temp[i]));
-        //     }
-        //     return raw;
-        // }
-
-        // std::vector<std::complex<double>> compress(const std::vector<unsigned char>& data) {
-        //     double twiddle = 1;
-
-        //     auto waves = getFreqs(data);
-
-        //     double avg = 0;
-        //     for (const auto& i : waves) {
-        //         avg += abs(i);
-        //     }
-        //     avg /= waves.size() * twiddle;
-
-        //     for (auto& i : waves) {
-        //         if (abs(i) < avg) i *= 0;
-        //     }
-        //     return waves;
-        // }
-
-        // void compressAll() {
-        //     wavY = compress(Y);
-        //     wavCb = compress(Cb);
-        //     wavCr = compress(Cr);
-        // }
-    };
-
-    std::vector<Segment> segments;
-
-    // void compressSegments() {
-    //     for (auto& i : segments) {
-    //         i.compressAll();
-    //     }
-    // }
-    
     void loadImage(const std::string& path) {
         unsigned char* temp = stbi_load(path.c_str(), &width, &height, &channels, 3);
         if (temp) {
@@ -130,41 +101,17 @@ public:
         std::cout << "width: " << width << "\nheight: " << height << "\npixels: " << length << "\nchannels: " << channels << "\n";
     }
 
-    void segmentRaw() {
-        segLen = 64 * channels * sqrt(length); //todo : make adaptive probably
-        size_t i = 0;
-        long count = 0;
-        while (i < rawLength) {
-            count++;
-            if (i + segLen > rawLength) segLen = rawLength - i;
-            segments.emplace_back(*this, segLen, i, 1, 16);
-            i += segLen;
+    void subdivide(std::vector<unsigned char> data, long count) {
+        for (long i = 0; i < count; i++) {
+            Subsect temp;
+            long start = i * data.size()/count;
+            long endExclusive = (i+1) * data.size()/count; // exclusive end
+            temp.assignRawData(data, start, endExclusive);
+            // record the segment bounds
+            temp.start = start;
+            temp.end = endExclusive;
+            subsects.push_back(std::move(temp));
         }
-        std::cout << "created " << count << " segments\n";
-    }
-
-    void rejoinSegments() {
-
-    }
-
-    void saveNift(const std::string& path) {
-        /*
-        spec:
-        Nxn sized hIlbert and Fourier Transform
-        greyscale, rgb and rgba support
-        per image variable size transformed coeffs
-
-        bits : what its for
-
-        u4 : block size is (image size)^(1/2)
-        u32 : width
-        u32 : height
-        u2 : format (0 = grey, 2 = rgb, 3 = rgba)
-
-        u4 : num bits for transform real coeffs -1 (so 1111 -> 10000 -> 16 bits of precision, 0000 -> 0001 -> 1 bit of precision)
-        u4 : same for imag coeffs
-
-        */
     }
 
     void savePPM(const std::string& path) {
@@ -173,28 +120,28 @@ public:
         out.write(reinterpret_cast<char*>(rawData.data()), rawData.size());
     }
 
-    void hilbTo1d() {
-        image1d.resize(rawLength);
+    void rawToHilb() {
+        hilbMap.resize(rawLength);
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 int index = channels * (j + width * i);
                 int hilbidx = channels * gilbidx(j, i, width, height);
 
                 for (int k = 0; k < channels; k++) {
-                    image1d[hilbidx + k] = rawData[index + k];
+                    hilbMap[hilbidx + k] = rawData[index + k];
                 }
             }
         }
     }
 
-    void hilbTo2d() {
+    void hilbToRaw() {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 int index = channels * (j + width * i);
                 int hilbidx = channels * gilbidx(j, i, width, height);
 
                 for (int k = 0; k < channels; k++) {
-                    rawData[index + k] = image1d[hilbidx + k];
+                    rawData[index + k] = hilbMap[hilbidx + k];
                 }
             }
         }
@@ -204,94 +151,28 @@ public:
 
 int main(int argc, char** argv) {
     ThreadPool pool(std::thread::hardware_concurrency());
-    double keepfrac = std::stod(argv[2]);
     
-    Image image1;
+    Image image;
     std::string filepath = "";
     if (argc > 1) filepath = argv[1];
     std::cout << "filepath: " << filepath << "\n";
-    image1.loadImage(filepath);
-
-    FFT::init((size_t)image1.rawData.size());
-
-    Image image;
     image.loadImage(filepath);
-    
-    std::vector<std::complex<double>> b;
-    std::vector<unsigned char> a(image.rawData.size());
-    for (long i = 0; i < image.height; i++) {
-        for (long j = 0; j < image.width; j++) {
-            long index = image.channels * (j + image.width * i);
-            long hilbidx = image.channels * gilbidx(j, i, image.width, image.height);
-            
-            for (long k = 0; k < image.channels; k++) {
-                a[hilbidx + k] = image.rawData[index + k];
-            }
-        }
+    image.rawToHilb();
+    image.subdivide(image.hilbMap, (long)sqrt(image.rawLength));
+
+    for (auto &i : image.subsects) {
+        i.waves = i.toWaves(i.raw);
+
+        double avg = 0; // RMS average
+        for (auto i : i.waves) avg += pow(abs(i), 2);
+        avg /= i.waves.size();
+        avg = sqrt(avg);
+
+        for (auto& i : i.waves) i *= (abs(i) > avg);
+
+        i.raw = i.toData(i.waves);
+        i.integrateRawData(image.hilbMap);
     }
-    b.reserve(image.rawData.size());
-    for (unsigned char i : a) {
-        b.emplace_back((double)i, 0.0);
-    }
-    
-    
-    FFT::forward(b);
-    
-    
-    std::vector<std::tuple<std::complex<double>, size_t>> filterlist(b.size());
-    for (size_t i = 0; i < filterlist.size(); i++) {
-        filterlist[i] = std::make_tuple(b[i], i);
-    }
-    
-    std::cout << "keepfrac: " << keepfrac << "\n";
-    
-    //sort by amplitude
-    std::sort(filterlist.begin(), filterlist.end(), 
-    [](const std::tuple<std::complex<double>, size_t>& a, const std::tuple<std::complex<double>, size_t>& b) {
-        return abs(std::get<0>(a)) > abs(std::get<0>(b));
-    });
-    
-    //replace smallest amplitudes with 0
-    for (size_t i = (double)filterlist.size() / keepfrac; i < filterlist.size(); i++) {
-        std::get<0>(filterlist[i]) = 0;
-    }
-    
-    //sort by frequency
-    std::sort(filterlist.begin(), filterlist.end(),
-    [](const std::tuple<std::complex<double>, size_t>& a, const std::tuple<std::complex<double>, size_t>& b) {
-        return std::get<1>(a) < std::get<1>(b);
-    });
-    for (size_t i = 0; i < filterlist.size(); i++) {
-        b[i] = std::get<0>(filterlist[i]);
-    }
-    
-    
-    FFT::backward(b);
-    
-    // write back using the real part, normalize and clamp.
-    // If your FFT::backward already normalizes the inverse transform, remove the divide by b.size().
-    for (size_t i = 0; i < a.size(); ++i) {
-        double val = b[i].real();
-        val /= static_cast<double>(b.size()); // normalize inverse FFT
-        long iv = std::lround(val);
-        if (iv < 0) iv = 0;
-        else if (iv > 255) iv = 255;
-        a[i] = static_cast<unsigned char>(iv);
-    }
-    
-    for (long i = 0; i < image.height; i++) {
-        for (long j = 0; j < image.width; j++) {
-            long index = image.channels * (j + image.width * i);
-            long hilbidx = image.channels * gilbidx(j, i, image.width, image.height);
-            
-            for (long k = 0; k < image.channels; k++) {
-                image.rawData[index + k] = a[hilbidx + k];
-            }
-        }
-    }
-    
-    // std::string num = std::to_string((long)keepfrac);
-    // while (num.size() < 6) num = "0" + num;
+    image.hilbToRaw();
     image.savePPM("img.ppm");
-    
 }

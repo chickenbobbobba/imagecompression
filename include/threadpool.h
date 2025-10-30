@@ -1,5 +1,4 @@
 #include <atomic>
-#include <chrono>
 #include <condition_variable>
 #include <functional>
 #include <future>
@@ -85,7 +84,7 @@ public:
 
     void purge() {
         std::lock_guard<std::mutex> lock(mutex);
-        for (int i = 0; i < tasks.size(); i++) {
+        for (size_t i = 0; i < tasks.size(); i++) {
             tasks.pop();
         }
     }

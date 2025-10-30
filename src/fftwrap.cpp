@@ -1,56 +1,79 @@
 #include <fftw3.h>
 #include <fftwrap.hpp>
 #include <cassert>
+#include <iostream>
+#include <unordered_map>
 
-fftw_plan FFT::forward_plan = nullptr;
-fftw_plan FFT::backward_plan = nullptr;
-size_t FFT::size = 0;
+struct FFT::PlanPair {
+    fftw_plan forward;
+    fftw_plan backward;
+};
+
+std::unordered_map<size_t, FFT::PlanPair> FFT::plans;
 std::mutex FFT::fftw_mutex;
 
 void FFT::init(size_t N) {
     std::lock_guard<std::mutex> lock(fftw_mutex);
-    if (N == size && forward_plan && backward_plan) return;
-
-    cleanup(); // free any old plans
-    size = N;
-
+    
+    // Check if plan already exists for this size
+    if (plans.find(N) != plans.end()) {
+        return;
+    }
+    
+    // Create new plans for this size
     std::vector<std::complex<double>> temp(N);
-
-    forward_plan = fftw_plan_dft_1d(
+    
+    fftw_plan forward = fftw_plan_dft_1d(
         N,
         reinterpret_cast<fftw_complex*>(temp.data()),
         reinterpret_cast<fftw_complex*>(temp.data()),
         FFTW_FORWARD,
         FFTW_ESTIMATE
     );
-
-    backward_plan = fftw_plan_dft_1d(
+    
+    fftw_plan backward = fftw_plan_dft_1d(
         N,
         reinterpret_cast<fftw_complex*>(temp.data()),
         reinterpret_cast<fftw_complex*>(temp.data()),
         FFTW_BACKWARD,
         FFTW_ESTIMATE
     );
-
-    fftw_print_plan(forward_plan);
+    
+    plans[N] = {forward, backward};
+    
+    fftw_print_plan(forward);
+    std::cout << "\n";
 }
 
 void FFT::forward(std::vector<std::complex<double>>& data) {
-    assert(data.size() == size);
-    fftw_execute_dft(forward_plan,
+    size_t N = data.size();
+    
+    auto it = plans.find(N);
+    assert(it != plans.end() && "FFT::init must be called before forward");
+    
+    fftw_execute_dft(it->second.forward,
         reinterpret_cast<fftw_complex*>(data.data()),
         reinterpret_cast<fftw_complex*>(data.data()));
 }
 
 void FFT::backward(std::vector<std::complex<double>>& data) {
-    assert(data.size() == size);
-    fftw_execute_dft(backward_plan,
+    size_t N = data.size();
+    
+    auto it = plans.find(N);
+    assert(it != plans.end() && "FFT::init must be called before backward");
+    
+    fftw_execute_dft(it->second.backward,
         reinterpret_cast<fftw_complex*>(data.data()),
         reinterpret_cast<fftw_complex*>(data.data()));
 }
 
 void FFT::cleanup() {
-    if (forward_plan) fftw_destroy_plan(forward_plan);
-    if (backward_plan) fftw_destroy_plan(backward_plan);
-    forward_plan = backward_plan = nullptr;
+    std::lock_guard<std::mutex> lock(fftw_mutex);
+    
+    for (auto& [size, plan_pair] : plans) {
+        if (plan_pair.forward) fftw_destroy_plan(plan_pair.forward);
+        if (plan_pair.backward) fftw_destroy_plan(plan_pair.backward);
+    }
+    
+    plans.clear();
 }
