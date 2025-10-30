@@ -5,6 +5,7 @@
 #include <string>
 #include <thread>
 #include <unistd.h>
+#include <utility>
 #include <vector>
 #include <hilbert.hpp>
 #include <fstream>
@@ -26,7 +27,6 @@ class Subsect {
     std::vector<unsigned char> Cr;
 
     std::vector<unsigned char> raw;
-    std::vector<std::complex<double>> waves;
 
     size_t start;
     size_t end;
@@ -45,6 +45,113 @@ class Subsect {
         assert(data.size() >= raw.size() + start);
         memcpy(data.data() + start, raw.data(), raw.size());
     }
+
+    void toYCbCr(long yScale, long cScale) {
+        size_t segLen = raw.size();
+        Y.reserve(segLen/yScale);
+        Cb.reserve(segLen/cScale);
+        Cr.reserve(segLen/cScale);
+        // fill Y
+        for (size_t i = 0; i + 2 < segLen; i += 3 * yScale) {
+            assert(i + 2 < segLen);
+            Y.push_back(0.299 * raw[i] + 0.587 * raw[i+1] + 0.114 * raw[i+2]);
+        }
+        
+        // fill Cb Cr
+        for (size_t i = 0; i + 2 < segLen; i += 3 * cScale) {
+            assert(i + 2 < segLen);
+            Cb.push_back(128 - 0.168736 * raw[i] - 0.331264 * raw[i+1] + 0.5 * raw[i+2]);
+            Cr.push_back(128 + 0.5 * raw[i] - 0.418688 * raw[i+1] - 0.081312 * raw[i+2]);
+        }
+    }
+
+    void fromYCbCr() {
+        size_t segLen = end - start;
+        if (segLen == 0) return;
+        size_t np = segLen / 3;
+
+        // Guard against empty channels
+        if (Y.empty() && Cb.empty() && Cr.empty()) {
+            raw.assign(segLen, 0);
+            return;
+        }
+
+        FFT::init(Cb.size());
+        {
+            size_t oldSize = Cb.size();
+            size_t half = oldSize / 2;
+            
+            auto temp = toWaves(Cb);
+            size_t N = temp.size();
+            temp.resize(np, {0.0, 0.0});
+            
+            for (size_t i = half; i < N; i++) {
+                temp[np - (N - i)] = temp[i];
+                temp[i] = {0.0, 0.0};
+            }
+            
+            double scale = (double)np / (double)oldSize;
+            for (auto& f : temp) f *= scale;
+            
+            FFT::init(np);
+            Cb = toData(temp);
+            
+            temp = toWaves(Cr);
+            temp.resize(np, {0.0, 0.0});
+            
+            for (size_t i = half; i < N; i++) {
+                temp[np - (N - i)] = temp[i];
+                temp[i] = {0.0, 0.0};
+            }
+            
+            for (auto& f : temp) f *= scale;
+            Cr = toData(temp);
+        }
+
+        // Upscale Y the same way as Cb/Cr if needed
+        if (!Y.empty() && Y.size() != np) {
+            size_t oldY = Y.size();
+            size_t halfY = oldY / 2;
+            auto tempY = toWaves(Y);
+            size_t NY = tempY.size();
+            tempY.resize(np, {0.0, 0.0});
+
+            for (size_t i = halfY; i < NY; i++) {
+                tempY[np - (NY - i)] = tempY[i];
+                tempY[i] = {0.0, 0.0};
+            }
+
+            double scaleY = (double)np / (double)oldY;
+            for (auto& f : tempY) f *= scaleY;
+
+            FFT::init(np);
+            Y = toData(tempY);
+        }
+
+        raw.assign(segLen, 0);
+
+        for (size_t px = 0; px < np; ++px) {
+            size_t y_idx = (Y.empty() ? 0 : std::min((size_t)(px), Y.size() - 1));
+            size_t c_idx = (Cb.empty() ? 0 : std::min((size_t)(px), Cb.size() - 1));
+
+            double Yv = (Y.empty() ? 0.0 : (double)Y[y_idx]);
+            double Cbv = (Cb.empty() ? 128.0 : (double)Cb[c_idx]);
+            double Crv = (Cr.empty() ? 128.0 : (double)Cr[c_idx]);
+
+            double R = Yv + 1.402   * (Crv - 128.0);
+            double G = Yv - 0.344136* (Cbv - 128.0) - 0.714136 * (Crv - 128.0);
+            double B = Yv + 1.772   * (Cbv - 128.0);
+
+            auto clamp_byte = [](double v) -> unsigned char {
+                return static_cast<unsigned char>(std::clamp((int)std::lround(v), 0, 255));
+            };
+
+            size_t base = px * 3;
+            raw[base + 0] = clamp_byte(R);
+            raw[base + 1] = clamp_byte(G);
+            raw[base + 2] = clamp_byte(B);
+        }
+    }
     
     std::vector<std::complex<double>> toWaves(const std::vector<unsigned char>& data) {
         std::vector<std::complex<double>> waves;
@@ -52,7 +159,8 @@ class Subsect {
         for (unsigned char v : data) {
             waves.emplace_back((double)v, 0.0);
         }
-
+        
+        FFT::init(waves.size());
         FFT::forward(waves);
         return waves; 
     }
@@ -61,6 +169,7 @@ class Subsect {
         std::vector<unsigned char> raw(data.size());
 
         auto temp = data;
+        FFT::init(temp.size());
         FFT::backward(temp);
 
         for (size_t i = 0; i < temp.size(); i++) {
@@ -106,7 +215,7 @@ public:
             Subsect temp;
             long start = i * data.size()/count;
             start -= start % 3;
-            long endExclusive = (i+1) * data.size()/count; // exclusive end
+            long endExclusive = (i+1) * data.size()/count;
             temp.assignRawData(data, start, endExclusive);
             // record the segment bounds
             temp.start = start;
@@ -150,46 +259,52 @@ public:
     
 };
 
-
-
-
 int main(int argc, char** argv) {
-    // ThreadPool pool(std::thread::hardware_concurrency());
-    // for(double cut = 0.0; cut <= 10.0; cut += 0.5) {
+    ThreadPool pool(std::thread::hardware_concurrency());
+
+    char mode = argv[2][0];
+
+    Image image;
+    std::string filepath = "";
+    if (argc > 1) filepath = argv[1];
+    std::cout << "filepath: " << filepath << "\n";
+    image.loadImage(filepath);
+    image.rawToHilb();
+    // image.subdivide(image.hilbMap, (long)(pow(image.rawLength, 0.5) * log2(image.rawLength)));
+    // image.subdivide(image.hilbMap, (long)(sqrt(image.rawLength)));
+    // image.subdivide(image.hilbMap, image.rawData.size()/2048);
+    image.subdivide(image.hilbMap, sqrt(image.rawLength) * log2(image.rawLength));
+
+    
+    for (auto &i : image.subsects) {
+        i.toYCbCr(1, 8);
+        
+        // auto wavesY = i.toWaves(i.Y);
+        // auto wavesCb = i.toWaves(i.Cb);
+        // auto wavesCr = i.toWaves(i.Cr);
 
         
-    //     Image image;
-    //     std::string filepath = "";
-    //     if (argc > 1) filepath = argv[1];
-    //     std::cout << "filepath: " << filepath << "\n";
-    //     image.loadImage(filepath);
-    //     image.rawToHilb();
-    //     image.subdivide(image.hilbMap, (long)(sqrt(image.rawLength) * log(image.rawLength)));
+        // i.Y = i.toData(wavesY);
+        // i.Cb = i.toData(wavesCb);
+        // i.Cr = i.toData(wavesCr);
         
-    //     long count = 0;
-        
-    //     for (auto &i : image.subsects) {
-    //         i.waves = i.toWaves(i.raw);
-            
-    //         double avg = 0; // RMS average
-    //         for (auto i : i.waves) avg += pow(abs(i), 0.5);
-    //         avg /= i.waves.size();
-    //         avg = pow(avg, 2) * cut;
-            
-    //         for (auto& i : i.waves) {
-    //             i *= (abs(i) > avg);
-    //             if (i != 0.0) count++;
-    //         }
-            
-    //         i.raw = i.toData(i.waves);
-    //         i.integrateRawData(image.hilbMap);
-    //     }
-        
-    //     std::string retention = std::to_string((double)count/image.rawLength);
-    //     std::string cutstr = std::to_string(cut);
-    //     cutstr.resize(3);
-        
-    //     image.hilbToRaw();
-    //     image.savePPM("img" + cutstr + "-" + retention + ".ppm");
-    // }
+        if (mode == 'c') {
+            for (auto& a : i.Y) a = 128.0;
+        }
+        if (mode == 'y') {
+            for (auto& a : i.Cb) a = 128;
+            for (auto& a : i.Cr) a = 128;
+        }
+
+        i.fromYCbCr();
+        i.integrateRawData(image.hilbMap);
+    }
+    
+    // std::string retention = std::to_string((double)count/image.rawLength);
+    // std::string cutstr = std::to_string(cut);
+    // cutstr.resize(3);
+    
+    image.hilbToRaw();
+    // image.savePPM("img" + cutstr + "-" + retention + ".ppm");
+    image.savePPM("img.ppm");
 }
