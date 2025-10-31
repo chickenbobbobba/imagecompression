@@ -213,10 +213,14 @@ class Subsect {
         /*
         32 : width
         32 : height
-        32 : index of 2x8 bit
-        32 : index of 2x6 bit
-        32 : index of 2x4 bit
-        32 : index of 2x2 bit
+        32 : end of 2x8 encoded luminance
+        32 : end of 2x6 encoded luminance
+        32 : end of 2x4 encoded luminance
+        32 : end of 2x2 encoded luminance
+        32 : end of 2x8 encoded CbCr
+        32 : end of 2x6 encoded CbCr
+        32 : end of 2x4 encoded CbCr
+        32 : end of 2x2 encoded CbCr
         */
     }
 };
